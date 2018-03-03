@@ -5,7 +5,7 @@ module Main where
 import qualified Lib
 import System.Environment
 import Web.Scotty
-import Data.Aeson (decode)
+import Data.Aeson (eitherDecode)
 import Data.Maybe
 
 getPort :: IO Int
@@ -20,7 +20,7 @@ main = do
 		matchAny "/" $ text "Hello World"
 
 start :: ActionM ()
-start = fmap (fromJust . decode) body >>= (json . Lib.start)
+start = fmap (either error id . eitherDecode) body >>= (json . Lib.start)
 
 move :: ActionM ()
-move = fmap (fromJust . decode) body >>= (json . Lib.move)
+move = fmap (either error id . eitherDecode) body >>= (json . Lib.move)
