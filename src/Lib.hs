@@ -11,7 +11,7 @@ move req =
 	let
 		List (head : _) = body $ you req
 		List f = food req
-		p = fromJust $ shortest head f
+		p = fromMaybe (Point 0 0) $ shortest head f
 	in
 		MoveResp {action = goto head p}
 
