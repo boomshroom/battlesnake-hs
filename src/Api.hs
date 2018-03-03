@@ -22,7 +22,7 @@ data StartResp = StartResp { color :: String, head_type :: String, tail_type :: 
 data MoveReq = MoveReq { food :: List Point, height :: Int, snakes :: List Snake, turn :: Int, width :: Int, you :: Snake} deriving (Generic, Show)
 data MoveResp = MoveResp { action :: Direction } deriving (Generic, Show)
 
-data Point = Point Int Int deriving (Generic, Show)
+data Point = Point Int Int deriving (Generic, Show, Eq)
 
 data List a = List [a] deriving (Generic, Show)
 
