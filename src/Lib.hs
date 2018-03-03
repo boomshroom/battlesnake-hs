@@ -4,11 +4,15 @@ import Api
 import Data.Maybe
 
 start :: StartReq -> StartResp
-start _ = StartResp { color = "#FF0000", head_type = "pixel", tail_type = "pixel" }
+start _ = StartResp { color = "#FF0000", head_type = "pixel",
+	tail_type = "pixel", head_url = "http://i0.kym-cdn.com/entries/icons/original/000/024/812/dontforgetme2.png",
+	taunt = "Think you can take me?" }
 
 move :: MoveReq -> MoveResp
-move req = MoveResp $
-	let
+move req = MoveResp { action = dir req}
+	
+dir :: MoveReq -> Direction
+dir req = let
 		List (head : _) = body $ you req
 		List f = food req
 		p = fromMaybe (Point 0 0) $ shortest head f
@@ -17,6 +21,7 @@ move req = MoveResp $
 		if is_safe req $ offset head dir1 then dir1
 		else if is_safe req $ offset head dir2 then dir2
 		else fallback req
+
 
 fallback :: MoveReq -> Direction
 fallback board = let List (head : _) = body $ you board in

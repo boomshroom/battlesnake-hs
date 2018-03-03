@@ -17,7 +17,7 @@ import GHC.Generics
 import Data.HashMap.Strict
 
 data StartReq = StartReq { game_id :: Int, start_width :: Int, start_height :: Int } deriving (Generic, Show)
-data StartResp = StartResp { color :: String, head_type :: String, tail_type :: String } deriving (Generic, Show)
+data StartResp = StartResp { color :: String, head_type :: String, tail_type :: String, head_url :: String, taunt :: String } deriving (Generic, Show)
 
 data MoveReq = MoveReq { food :: List Point, height :: Int, snakes :: List Snake, turn :: Int, width :: Int, you :: Snake} deriving (Generic, Show)
 data MoveResp = MoveResp { action :: Direction } deriving (Generic, Show)
@@ -26,7 +26,7 @@ data Point = Point Int Int deriving (Generic, Show, Eq)
 
 data List a = List [a] deriving (Generic, Show)
 
-data Snake = Snake { body :: List Point, health :: Int, snake_id :: String, snake_length :: Int, name :: String, taunt :: Maybe String} deriving (Generic, Show)
+data Snake = Snake { body :: List Point, health :: Int, snake_id :: String, snake_length :: Int, name :: String, s_taunt :: Maybe String} deriving (Generic, Show)
 
 data Direction = DUp | DLeft | DDown | DRight deriving (Show)
 
@@ -60,7 +60,7 @@ instance FromJSON Snake where
 		length <- v .: "length"
 		name <- v .: "name"
 		taunt <- v .: "taunt"
-		return Snake {body = body, health = health, snake_id = id, snake_length = length, name = name, taunt = taunt}
+		return Snake {body = body, health = health, snake_id = id, snake_length = length, name = name, s_taunt = taunt}
 
 instance FromJSON Point where
 	parseJSON = withObject "Point" $ \v -> do

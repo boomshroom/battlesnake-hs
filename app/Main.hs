@@ -17,6 +17,7 @@ main = do
 	scotty port $ do
 		matchAny "/start" start
 		matchAny "/move" move
+		matchAny "/end" $ return ()
 		matchAny "/" $ text "Hello World"
 
 start :: ActionM ()
