@@ -15,7 +15,7 @@ dir :: MoveReq -> Direction
 dir req = let
 		List (head : _) = body $ you req
 		List f = food req
-		p = fromMaybe (Point 0 0) $ shortest head f
+		p = fromMaybe (Point 0 0) $ valuable req f
 		(dir1, dir2) = goto head p
 	in
 		if is_safe req $ offset head dir1 then dir1
@@ -39,6 +39,12 @@ shortest here = foldl (\s p -> Just $ case s of
 	Just s -> if dist here p < dist here s then p else s
 	Nothing -> p) Nothing
 
+valuable :: MoveReq -> [Point] -> Maybe Point
+valuable req = 
+	foldl (\v p -> Just $ case v of 
+	Just v -> if value (snakes req) v < value (snakes req) p then p else v
+	Nothing -> p) Nothing
+
 goto :: Point -> Point -> (Direction, Direction)
 goto (Point x1 y1) (Point x2 y2) =
 	let
@@ -55,10 +61,16 @@ is_safe board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= widt
 		List s = snakes board
 		me = you board
 	in 
-		if any (\s -> case body s of List (h : _) -> adjacent h p && snake_length s >= snake_length me) $
+		if any (\s -> adjacent (snake_head s) p && snake_length s >= snake_length me) $
 			filter (\s -> snake_id s /= snake_id me) s 
 		then False
 		else all (/= p)$ s >>= (\s -> case body s of List p -> p)
+
+value :: List Snake -> Point -> Int
+value (List snakes) p = sum $ map (dist p) $ map snake_head snakes
+
+snake_head :: Snake -> Point
+snake_head s = let List (h:_) = body s in h
 
 offset :: Point -> Direction -> Point
 offset (Point x y) DUp = Point x (y-1)
