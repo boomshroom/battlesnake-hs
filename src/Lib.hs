@@ -51,10 +51,13 @@ goto (Point x1 y1) (Point x2 y2) =
 
 is_safe :: MoveReq -> Point -> Bool
 is_safe board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= width board then False
-	else let List s = snakes board
+	else let
+		List s = snakes board
+		me = you board
 	in 
-		if any (\s -> case body s of List (h : _) -> adjacent h p && snake_length s >= snake_length (you board)) s
-			then False
+		if any (\s -> case body s of List (h : _) -> adjacent h p && snake_length s >= snake_length me) $
+			filter (\s -> snake_id s /= snake_id me) s 
+		then False
 		else all (/= p)$ s >>= (\s -> case body s of List p -> p)
 
 offset :: Point -> Direction -> Point
