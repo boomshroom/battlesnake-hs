@@ -1,1 +1,1 @@
-web: battlesnake-hs
+web: battlesnake-hs-exe
