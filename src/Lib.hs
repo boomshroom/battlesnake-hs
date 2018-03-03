@@ -12,14 +12,19 @@ move req = MoveResp $
 		List (head : _) = body $ you req
 		List f = food req
 		p = fromMaybe (Point 0 0) $ shortest head f
-		dir = goto head p
+		(dir1, dir2) = goto head p
 	in
-		if is_safe req $ offset head dir then dir
-		else if is_safe req $ offset head DUp then DUp
-		else if is_safe req $ offset head DDown then DDown
-		else if is_safe req $ offset head DLeft then DLeft
-		else if is_safe req $ offset head DRight then DRight
-		else DUp -- Dead
+		if is_safe req $ offset head dir1 then dir1
+		else if is_safe req $ offset head dir2 then dir2
+		else fallback req
+
+fallback :: MoveReq -> Direction
+fallback board = let List (head : _) = body $ you board in
+	if is_safe board $ offset head DUp then DUp
+	else if is_safe board $ offset head DDown then DDown
+	else if is_safe board $ offset head DLeft then DLeft
+	else if is_safe board $ offset head DRight then DRight
+	else DUp -- Dead
 
 dist :: Point -> Point -> Int
 dist (Point x1 y1) (Point x2 y2) = abs (x1 - x2) + abs (y1 - y2)
@@ -29,19 +34,18 @@ shortest here = foldl (\s p -> Just $ case s of
 	Just s -> if dist here p < dist here s then p else s
 	Nothing -> p) Nothing
 
-goto :: Point -> Point -> Direction
+goto :: Point -> Point -> (Direction, Direction)
 goto (Point x1 y1) (Point x2 y2) =
 	let
 		dy = y2 - y1
 		dx = x2 - x1
-	in
-		if abs dx < abs dy then
-			if dy > 0 then DDown else DUp
-		else
-			if dx > 0 then DRight else DLeft
+		v = if dy > 0 then DDown else DUp
+		h = if dx > 0 then DRight else DLeft
+	in if abs dx < abs dy then (v, h) else (h, v)
+			
 
 is_safe :: MoveReq -> Point -> Bool
-is_safe board p@(Point x y) = if x < 0 || x > width board || y < 0 || y > width board then False
+is_safe board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= width board then False
 	else let List s = snakes board
 	in all (/= p)$ s >>= (\s -> case body s of List p -> p)
 
