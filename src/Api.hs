@@ -9,6 +9,7 @@ module Api
 	, Point(..)
 	, List(..)
 	, Snake(..)
+	, Direction(..)
 	) where
 
 import Data.Aeson
@@ -19,13 +20,21 @@ data StartReq = StartReq { game_id :: Int, start_width :: Int, start_height :: I
 data StartResp = StartResp { color :: String, head_type :: String, tail_type :: String } deriving (Generic, Show)
 
 data MoveReq = MoveReq { food :: List Point, height :: Int, snakes :: List Snake, turn :: Int, width :: Int, you :: Snake} deriving (Generic, Show)
-data MoveResp = MoveResp { action :: String } deriving (Generic, Show)
+data MoveResp = MoveResp { action :: Direction } deriving (Generic, Show)
 
-data Point = Point (Int, Int) deriving (Generic, Show)
+data Point = Point Int Int deriving (Generic, Show)
 
 data List a = List [a] deriving (Generic, Show)
 
 data Snake = Snake { body :: List Point, health :: Int, snake_id :: String, snake_length :: Int, name :: String, taunt :: String} deriving (Generic, Show)
+
+data Direction = Up | Left | Down | Right
+
+instance ToJSON Direction where
+	toJSON Up = "up"
+	toJSON Left = "left"
+	toJSON Down = "down"
+	toJSON Right = "right"
 
 instance FromJSON StartReq where
 	parseJSON = withObject "StartReq" $ \v -> do
@@ -57,4 +66,4 @@ instance FromJSON Point where
 	parseJSON = withObject "Point" $ \v -> do
 		x <- v .: "x"
 		y <- v .: "y"
-		return $ Point (x, y)
+		return $ Point x y
