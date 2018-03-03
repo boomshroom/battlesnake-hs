@@ -28,13 +28,13 @@ data List a = List [a] deriving (Generic, Show)
 
 data Snake = Snake { body :: List Point, health :: Int, snake_id :: String, snake_length :: Int, name :: String, taunt :: String} deriving (Generic, Show)
 
-data Direction = Up | Left | Down | Right
+data Direction = DUp | DLeft | DDown | DRight deriving (Show)
 
 instance ToJSON Direction where
-	toJSON Up = "up"
-	toJSON Left = "left"
-	toJSON Down = "down"
-	toJSON Right = "right"
+	toJSON DUp = "up"
+	toJSON DLeft = "left"
+	toJSON DDown = "down"
+	toJSON DRight = "right"
 
 instance FromJSON StartReq where
 	parseJSON = withObject "StartReq" $ \v -> do
