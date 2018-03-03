@@ -26,7 +26,7 @@ data Point = Point Int Int deriving (Generic, Show)
 
 data List a = List [a] deriving (Generic, Show)
 
-data Snake = Snake { body :: List Point, health :: Int, snake_id :: String, snake_length :: Int, name :: String, taunt :: String} deriving (Generic, Show)
+data Snake = Snake { body :: List Point, health :: Int, snake_id :: String, snake_length :: Int, name :: String, taunt :: Maybe String} deriving (Generic, Show)
 
 data Direction = DUp | DLeft | DDown | DRight deriving (Show)
 
