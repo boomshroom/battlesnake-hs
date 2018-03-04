@@ -64,7 +64,7 @@ is_safe rec board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= 
 		if any (\s -> adjacent (snake_head s) p && snake_length s >= snake_length me) $
 			filter (\s -> snake_id s /= snake_id me) s 
 		then False
-		else if any (/= p)$ s >>= (\s -> case body s of List p -> p) then False
+		else if any (== p)$ s >>= (\s -> case body s of List p -> p) then False
 		else isOpen rec board p
 
 isOpen :: Int -> MoveReq -> Point -> Bool
