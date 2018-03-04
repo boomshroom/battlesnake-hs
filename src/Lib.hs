@@ -17,7 +17,8 @@ dir req = let
 		List (head : _) = body $ you req
 		List f = food req
 		p = fromMaybe (Point 0 0) $ valuable req f
-		(dir1, dir2) = goto head p
+		close = fromMaybe (Point 0 0) $ shortest head f
+		(dir1, dir2) = goto head $ if dist head close < 5 then close else p
 	in
 		if is_safe empty req $ offset head dir1 then dir1
 		else if is_safe empty req $ offset head dir2 then dir2
