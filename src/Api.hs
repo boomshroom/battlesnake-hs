@@ -15,6 +15,7 @@ module Api
 import Data.Aeson
 import GHC.Generics
 import Data.HashMap.Strict
+import Data.Hashable
 
 data StartReq = StartReq { game_id :: Int, start_width :: Int, start_height :: Int } deriving (Generic, Show)
 data StartResp = StartResp { color :: String, head_type :: String, tail_type :: String, head_url :: String, taunt :: String } deriving (Generic, Show)
@@ -67,3 +68,5 @@ instance FromJSON Point where
 		x <- v .: "x"
 		y <- v .: "y"
 		return $ Point x y
+
+instance Hashable Point

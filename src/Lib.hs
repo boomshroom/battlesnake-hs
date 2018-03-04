@@ -2,6 +2,7 @@ module Lib (start, move) where
 
 import Api
 import Data.Maybe
+import Data.HashSet (HashSet, empty, insert, member, size)
 
 start :: StartReq -> StartResp
 start _ = StartResp { color = "#FF0000", head_type = "pixel",
@@ -18,17 +19,17 @@ dir req = let
 		p = fromMaybe (Point 0 0) $ valuable req f
 		(dir1, dir2) = goto head p
 	in
-		if is_safe 0 req $ offset head dir1 then dir1
-		else if is_safe 0 req $ offset head dir2 then dir2
+		if is_safe empty req $ offset head dir1 then dir1
+		else if is_safe empty req $ offset head dir2 then dir2
 		else fallback req
 
 
 fallback :: MoveReq -> Direction
 fallback board = let List (head : _) = body $ you board in
-	if is_safe 0 board $ offset head DUp then DUp
-	else if is_safe 0 board $ offset head DDown then DDown
-	else if is_safe 0 board $ offset head DLeft then DLeft
-	else if is_safe 0 board $ offset head DRight then DRight
+	if is_safe empty board $ offset head DUp then DUp
+	else if is_safe empty board $ offset head DDown then DDown
+	else if is_safe empty board $ offset head DLeft then DLeft
+	else if is_safe empty board $ offset head DRight then DRight
 	else DUp -- Dead
 
 dist :: Point -> Point -> Int
@@ -55,8 +56,10 @@ goto (Point x1 y1) (Point x2 y2) =
 	in if abs dx < abs dy then (v, h) else (h, v)
 			
 
-is_safe :: Int -> MoveReq -> Point -> Bool
-is_safe rec board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= width board then False
+is_safe :: HashSet Point -> MoveReq -> Point -> Bool
+is_safe checked board p@(Point x y) =
+	if member p checked then False
+	else if x < 0 || x >= width board || y < 0 || y >= width board then False
 	else let
 		List s = snakes board
 		me = you board
@@ -64,11 +67,11 @@ is_safe rec board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= 
 		if any (\s -> adjacent (snake_head s) p && snake_length s >= snake_length me) $
 			filter (\s -> snake_id s /= snake_id me) s 
 		then False
-		else if any (== p)$ s >>= (\s -> case body s of List p -> p) then False
-		else isOpen rec board p
+		else if any (== p) $ s >>= (\s -> case body s of List p -> p) then False
+		else isOpen (insert p checked) board p
 
-isOpen :: Int -> MoveReq -> Point -> Bool
-isOpen rec board p = if rec >= (snake_length . you $ board) then True else any (is_safe (rec+1) board) $ neighbors p
+isOpen :: HashSet Point -> MoveReq -> Point -> Bool
+isOpen checked board p = if size checked >= (snake_length . you $ board) then True else any (is_safe (checked) board) $ neighbors p
 
 value :: List Snake -> Point -> Int
 value (List snakes) p = sum $ map (dist p) $ map snake_head snakes
