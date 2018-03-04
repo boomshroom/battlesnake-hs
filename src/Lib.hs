@@ -18,17 +18,17 @@ dir req = let
 		p = fromMaybe (Point 0 0) $ valuable req f
 		(dir1, dir2) = goto head p
 	in
-		if is_safe req $ offset head dir1 then dir1
-		else if is_safe req $ offset head dir2 then dir2
+		if is_safe 0 req $ offset head dir1 then dir1
+		else if is_safe 0 req $ offset head dir2 then dir2
 		else fallback req
 
 
 fallback :: MoveReq -> Direction
 fallback board = let List (head : _) = body $ you board in
-	if is_safe board $ offset head DUp then DUp
-	else if is_safe board $ offset head DDown then DDown
-	else if is_safe board $ offset head DLeft then DLeft
-	else if is_safe board $ offset head DRight then DRight
+	if is_safe 0 board $ offset head DUp then DUp
+	else if is_safe 0 board $ offset head DDown then DDown
+	else if is_safe 0 board $ offset head DLeft then DLeft
+	else if is_safe 0 board $ offset head DRight then DRight
 	else DUp -- Dead
 
 dist :: Point -> Point -> Int
@@ -55,8 +55,8 @@ goto (Point x1 y1) (Point x2 y2) =
 	in if abs dx < abs dy then (v, h) else (h, v)
 			
 
-is_safe :: MoveReq -> Point -> Bool
-is_safe board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= width board then False
+is_safe :: Int -> MoveReq -> Point -> Bool
+is_safe rec board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= width board then False
 	else let
 		List s = snakes board
 		me = you board
@@ -64,7 +64,11 @@ is_safe board p@(Point x y) = if x < 0 || x >= width board || y < 0 || y >= widt
 		if any (\s -> adjacent (snake_head s) p && snake_length s >= snake_length me) $
 			filter (\s -> snake_id s /= snake_id me) s 
 		then False
-		else all (/= p)$ s >>= (\s -> case body s of List p -> p)
+		else if any (/= p)$ s >>= (\s -> case body s of List p -> p) then False
+		else isOpen rec board p
+
+isOpen :: Int -> MoveReq -> Point -> Bool
+isOpen rec board p = if rec >= (snake_length . you $ board) then True else any (is_safe (rec+1) board) $ neighbors p
 
 value :: List Snake -> Point -> Int
 value (List snakes) p = sum $ map (dist p) $ map snake_head snakes
@@ -78,5 +82,8 @@ offset (Point x y) DRight = Point (x+1) y
 offset (Point x y) DLeft = Point (x-1) y
 offset (Point x y) DDown = Point x (y+1)
 
+neighbors :: Point -> [Point]
+neighbors p = map (offset p) [DUp, DDown, DRight, DLeft] 
+
 adjacent :: Point -> Point -> Bool
-adjacent p1 p2 = any (\d -> offset p2 d == p1) [DUp, DDown, DRight, DLeft] 
+adjacent p1 p2 = any (== p1) $ neighbors p2
